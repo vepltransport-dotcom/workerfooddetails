@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Food · Company+OT Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #181c25;
+            --surface2: #1e2333;
+            --surface3: #242940;
+            --border: #2a3045;
+            --accent: #4ade80;
+            --accent2: #60a5fa;
+            --accent3: #f59e0b;
+            --text: #e8edf5;
+            --muted: #6b7594;
+            --danger: #f87171;
+            --purple: #c084fc;
+            --radius: 14px;
+            --mono: 'DM Mono', monospace;
+            --display: 'Syne', sans-serif;
+            --body: 'DM Sans', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--body);
+            min-height: 100vh;
+            padding: 24px;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 10% 20%, rgba(74,222,128,0.05) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 90% 80%, rgba(96,165,250,0.05) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+        .app-title {
+            font-family: var(--display);
+            font-size: 1.55rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text);
+        }
+        .app-title span { color: var(--accent); }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .sheet-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 4px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-family: var(--body);
+            font-weight: 600;
+            font-size: 0.81rem;
+            padding: 7px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { background: var(--accent); color: #0a1a0f; }
+
+        .manage-btn {
+            background: var(--surface3);
+            border: 1px solid var(--accent2);
+            color: var(--accent2);
+            font-family: var(--body);
+            font-weight: 600;
+            font-size: 0.81rem;
+            padding: 7px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .manage-btn:hover { background: var(--accent2); color: #0a1020; }
+
+        .btn-print {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--body);
+            font-size: 0.81rem;
+            padding: 7px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .btn-print:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ===== PASSWORD ===== */
+        .password-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10000;
+        }
+        .password-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 40px 36px;
+            width: 90%; max-width: 380px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+        }
+        /* ✅ FIXED: lock icon now visible */
+        .password-card::before {
+            content: '🔒';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px; height: 52px;
+            background: rgba(96,165,250,0.12);
+            border: 1px solid rgba(96,165,250,0.3);
+            border-radius: 14px;
+            margin: 0 auto 18px;
+            font-size: 1.5rem;
+        }
+        .password-card h2 {
+            font-family: var(--display);
+            color: var(--text);
+            margin-bottom: 6px;
+            font-size: 1.5rem;
+        }
+        .password-card p {
+            color: var(--muted);
+            font-size: 0.82rem;
+            margin-bottom: 24px;
+        }
+        .password-card input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 14px;
+            outline: none;
+            font-family: var(--mono);
+            letter-spacing: 3px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .password-card input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(96,165,250,0.1); }
+        .password-card input.shake { animation: shake 0.35s ease; }
+        @keyframes shake { 0%,100%{transform:none} 20%{transform:translateX(-7px)} 60%{transform:translateX(7px)} }
+        .pw-error {
+            font-size: 0.75rem;
+            color: var(--danger);
+            margin-bottom: 10px;
+            min-height: 18px;
+            transition: opacity 0.2s;
+        }
+
+        /* ===== TOAST ===== */
+        .confirm-toast {
+            display: inline-block;
+            background: var(--accent);
+            color: #0a1a0f;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            margin-left: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .confirm-toast.show { opacity: 1; }
+
+        /* ===== UNDO TOAST ===== */
+        .undo-toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #1e2333;
+            border: 1px solid var(--accent3);
+            border-radius: 40px;
+            padding: 10px 18px 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.86rem;
+            font-weight: 500;
+            color: var(--text);
+            z-index: 9999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .undo-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+        .undo-toast-bar {
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 3px;
+            background: var(--accent3);
+            border-radius: 0 0 40px 40px;
+            transition: width linear;
+        }
+        .undo-btn {
+            background: var(--accent3);
+            border: none;
+            color: #1a0a00;
+            font-weight: 700;
+            font-size: 0.78rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: var(--body);
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+        .undo-btn:hover { background: #fcd34d; }
+
+        /* ===== CARDS ===== */
+        .sheet-pane { display: none; }
+        .sheet-pane.active { display: block; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 22px;
+            margin-bottom: 18px;
+        }
+        .card-title {
+            font-family: var(--display);
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .ml-auto { margin-left: auto; }
+
+        /* ===== FORM ===== */
+        .flex-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+        .field-group { display: flex; flex-direction: column; min-width: 120px; }
+        .field-group label {
+            font-size: 0.67rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--muted);
+            margin-bottom: 5px;
+            font-family: var(--mono);
+        }
+        .field-group input, .field-group select {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.88rem;
+            color: var(--text);
+            font-family: var(--body);
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .field-group input:focus, .field-group select:focus { border-color: var(--accent); }
+        .field-group select option { background: var(--surface2); }
+        .value-display {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.88rem;
+            color: var(--accent);
+            font-family: var(--mono);
+            font-weight: 500;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            background: var(--accent);
+            border: none;
+            color: #0a1a0f;
+            font-weight: 700;
+            font-family: var(--body);
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn:hover { background: #86efac; }
+        .btn.secondary { background: var(--surface3); color: var(--text); border: 1px solid var(--border); }
+        .btn.secondary:hover { border-color: var(--accent); color: var(--accent); }
+        .btn.danger { background: transparent; color: var(--danger); border: 1px solid #3a1f1f; font-size: 0.76rem; padding: 4px 9px; }
+        .btn.danger:hover { background: #3a1f1f; }
+        .btn.blue { background: var(--accent2); color: #0a1020; }
+        .btn.blue:hover { background: #93c5fd; }
+        .btn.amber { background: var(--accent3); color: #1a0a00; }
+        .btn.amber:hover { background: #fcd34d; }
+        .btn.sm { padding: 6px 12px; font-size: 0.78rem; }
+        .btn.purple { background: rgba(192,132,252,0.15); color: #c084fc; border: 1px solid rgba(192,132,252,0.3); }
+        .btn.purple:hover { background: rgba(192,132,252,0.25); }
+
+        /* ===== SEARCH BAR ===== */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+        }
+        .search-bar label { font-size: 0.73rem; color: var(--muted); font-family: var(--mono); }
+        .search-bar select, .search-bar input[type="text"], .search-bar input[type="date"] {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 6px 11px;
+            color: var(--text);
+            font-family: var(--body);
+            font-size: 0.86rem;
+            outline: none;
+        }
+        .search-bar input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+        .search-bar select:focus, .search-bar input:focus { border-color: var(--accent2); }
+        .search-divider { width: 1px; height: 22px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+
+        /* ===== TABLE ===== */
+        .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+        /* ✅ Sticky headers */
+        thead { background: var(--surface3); position: sticky; top: 0; z-index: 10; }
+        th {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            font-weight: 500;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 10px 13px;
+            text-align: left;
+            white-space: nowrap;
+            user-select: none;
+            background: var(--surface3);
+        }
+        th.sortable { cursor: pointer; }
+        th.sortable:hover { color: var(--text); }
+        th.sort-asc::after  { content: ' ↑'; color: var(--accent); }
+        th.sort-desc::after { content: ' ↓'; color: var(--accent); }
+        td { padding: 10px 13px; border-bottom: 1px solid var(--border); color: var(--text); white-space: nowrap; }
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: var(--surface2); }
+
+        /* ✅ Row flash highlight */
+        @keyframes rowFlash {
+            0%   { background: rgba(74,222,128,0.22); }
+            70%  { background: rgba(74,222,128,0.08); }
+            100% { background: transparent; }
+        }
+        .row-flash td { animation: rowFlash 1.8s ease forwards; }
+
+        .money       { font-family: var(--mono); color: var(--accent);  font-weight: 500; }
+        .money-blue  { font-family: var(--mono); color: var(--accent2); font-weight: 500; }
+        .money-amber { font-family: var(--mono); color: var(--accent3); font-weight: 500; }
+        .money-ot    { font-family: var(--mono); color: #fbbf24;        font-weight: 500; }
+        .money-sum   { font-family: var(--mono); color: #c084fc;        font-weight: 500; }
+
+        .badge-dept {
+            display: inline-block; padding: 2px 9px; border-radius: 20px;
+            font-size: 0.71rem; font-weight: 600;
+            background: var(--surface3); color: var(--muted); border: 1px solid var(--border);
+        }
+        .badge-shift { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.71rem; font-weight: 600; }
+        .shift-morning   { background: rgba(245,158,11,0.15);  color: var(--accent3); border: 1px solid rgba(245,158,11,0.25); }
+        .shift-afternoon { background: rgba(96,165,250,0.15);  color: var(--accent2); border: 1px solid rgba(96,165,250,0.25); }
+        .shift-night     { background: rgba(167,139,250,0.15); color: #a78bfa;        border: 1px solid rgba(167,139,250,0.25); }
+
+        /* ===== PAGINATION ===== */
+        .pagination {
+            display: flex; align-items: center; gap: 4px;
+            justify-content: flex-end; padding: 10px 14px;
+            border-top: 1px solid var(--border); flex-wrap: wrap;
+        }
+        .pg-btn {
+            background: var(--surface3); border: 1px solid var(--border);
+            color: var(--muted); font-size: 0.75rem; padding: 4px 9px;
+            border-radius: 6px; cursor: pointer; font-family: var(--mono); transition: all 0.15s;
+            min-width: 30px; text-align: center;
+        }
+        .pg-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+        .pg-btn.active { background: var(--accent); color: #0a1a0f; border-color: var(--accent); font-weight: 700; }
+        .pg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .pg-info { font-size: 0.7rem; color: var(--muted); font-family: var(--mono); padding: 0 4px; }
+
+        /* ===== STATS ROW ===== */
+        .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+        .stat-chip {
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 8px; padding: 9px 16px; font-size: 0.8rem;
+        }
+        .stat-chip span { font-family: var(--mono); font-weight: 500; }
+        .stat-chip .label   { color: var(--muted); margin-right: 5px; }
+        .stat-chip .val-green  { color: var(--accent); }
+        .stat-chip .val-blue   { color: var(--accent2); }
+        .stat-chip .val-amber  { color: var(--accent3); }
+        .stat-chip .val-ot     { color: #fbbf24; }
+        .stat-chip .val-sum    { color: #c084fc; }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); gap: 18px; }
+
+        /* ===== CHARTS ===== */
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 22px;
+        }
+        .chart-card-title {
+            font-family: var(--display);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+        .chart-wrap { width: 100%; overflow: hidden; }
+        .chart-empty { color: var(--muted); font-size: 0.82rem; text-align: center; padding: 24px 0; }
+
+        /* ===== FULLSCREEN ===== */
+        .fullscreen-modal { position: fixed; inset: 0; background: var(--bg); z-index: 5000; padding: 28px; overflow: auto; display: none; }
+        .fullscreen-modal.active { display: block; }
+        .fullscreen-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .fullscreen-header h2 { color: var(--accent2); font-family: var(--display); }
+        .close-full { background: var(--danger); border: none; color: white; font-size: 1.2rem; padding: 6px 18px; border-radius: 40px; cursor: pointer; }
+
+        /* ===== REPORTS ===== */
+        .print-preview {
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 22px; margin-top: 18px;
+            min-height: 180px; overflow: visible;
+        }
+        .print-preview table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+        .print-preview th { background: var(--surface3); padding: 8px 11px; text-align: left; font-family: var(--mono); font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+        .print-preview td { padding: 8px 11px; border-bottom: 1px solid var(--border); }
+        .report-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .empty { text-align: center; padding: 36px; color: var(--muted); font-size: 0.88rem; }
+
+        /* ===========================
+           ===== MANAGE DRAWER =====
+           =========================== */
+        .manage-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+        .manage-overlay.open { opacity: 1; pointer-events: all; }
+
+        .manage-drawer {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: 600px;
+            max-width: 96vw;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            z-index: 3100;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+        }
+        .manage-drawer.open { transform: translateX(0); }
+
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .drawer-header h2 {
+            font-family: var(--display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .drawer-header .sub {
+            font-size: 0.72rem;
+            color: var(--muted);
+            font-family: var(--mono);
+            margin-top: 1px;
+        }
+        .drawer-close {
+            margin-left: auto;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .drawer-close:hover { color: var(--danger); border-color: var(--danger); background: rgba(248,113,113,0.08); }
+
+        .drawer-body {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .drawer-depts {
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .drawer-depts-header {
+            padding: 12px 14px 8px;
+            font-size: 0.64rem;
+            font-family: var(--mono);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .dept-count-badge {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.6rem;
+            padding: 1px 6px;
+            color: var(--muted);
+            font-family: var(--mono);
+        }
+        .drawer-dept-list { flex: 1; overflow-y: auto; }
+        .drawer-dept-item {
+            padding: 9px 14px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(42,48,69,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            transition: background 0.12s;
+            color: var(--muted);
+        }
+        .drawer-dept-item:hover { background: var(--surface2); color: var(--text); }
+        .drawer-dept-item.active {
+            background: rgba(74,222,128,0.08);
+            color: var(--accent);
+            border-left: 2px solid var(--accent);
+        }
+        .drawer-dept-item .wcount {
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            background: var(--surface3);
+            border-radius: 9px;
+            padding: 1px 6px;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+        .drawer-dept-item.active .wcount { color: var(--accent); background: rgba(74,222,128,0.12); }
+        .drawer-dept-item .del-dept-btn {
+            background: none; border: none; color: var(--danger);
+            cursor: pointer; font-size: 0.75rem; opacity: 0;
+            padding: 1px 4px; transition: opacity 0.15s;
+            flex-shrink: 0;
+        }
+        .drawer-dept-item:hover .del-dept-btn { opacity: 0.7; }
+        .drawer-dept-item .del-dept-btn:hover { opacity: 1; }
+        .drawer-dept-add {
+            padding: 10px 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .drawer-dept-add input {
+            flex: 1;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 6px 9px;
+            color: white;
+            font-size: 0.79rem;
+            outline: none;
+            font-family: var(--body);
+            transition: border-color 0.15s;
+        }
+        .drawer-dept-add input:focus { border-color: var(--accent); }
+        .drawer-dept-add button {
+            background: var(--accent);
+            border: none; color: #0a1a0f;
+            font-weight: 700; font-size: 0.75rem;
+            padding: 5px 11px; border-radius: 7px;
+            cursor: pointer; white-space: nowrap;
+            transition: background 0.15s;
+        }
+        .drawer-dept-add button:hover { background: #86efac; }
+
+        .drawer-workers { display: flex; flex-direction: column; min-height: 0; }
+        .drawer-workers-header {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .drawer-workers-header .dept-label {
+            font-family: var(--display);
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .drawer-workers-header .worker-total {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            color: var(--muted);
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2px 8px;
+        }
+        .worker-add-row { display: flex; gap: 6px; margin-left: auto; }
+        .worker-add-row input {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 5px 10px;
+            color: white; font-size: 0.79rem;
+            outline: none; width: 155px;
+            transition: border-color 0.15s;
+        }
+        .worker-add-row input:focus { border-color: var(--accent); }
+        .worker-add-row button {
+            background: var(--accent2);
+            border: none; color: #0a1020;
+            font-weight: 700; font-size: 0.75rem;
+            padding: 5px 11px; border-radius: 7px;
+            cursor: pointer; white-space: nowrap;
+        }
+        .worker-add-row button:hover { background: #93c5fd; }
+
+        .drawer-worker-grid {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 7px;
+            align-content: start;
+        }
+        .worker-chip {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 10px 7px 12px;
+            font-size: 0.77rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            transition: border-color 0.15s;
+        }
+        .worker-chip:hover { border-color: rgba(248,113,113,0.4); }
+        .worker-chip span { color: var(--text); line-height: 1.3; word-break: break-word; }
+        .worker-chip button {
+            background: none; border: none;
+            color: var(--danger); cursor: pointer;
+            font-size: 0.78rem; opacity: 0.35;
+            flex-shrink: 0; padding: 1px 3px;
+            transition: opacity 0.15s;
+        }
+        .worker-chip:hover button { opacity: 1; }
+        .no-dept-msg {
+            grid-column: 1/-1;
+            padding: 30px 0;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.84rem;
+        }
+
+        .drawer-footer {
+            padding: 10px 16px;
+            border-top: 1px solid var(--border);
+            font-size: 0.67rem;
+            color: var(--muted);
+            font-family: var(--mono);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .drawer-footer .total-pill {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 0.65rem;
+        }
+
+        /* ===== PRINT ===== */
+        @media print {
+            body { background: white; color: black; padding: 16px; }
+            body::before { display: none; }
+            .app-header, .search-bar, .stats-row, .btn, .btn-print, .manage-btn,
+            .manage-overlay, .manage-drawer, .password-overlay,
+            .fullscreen-modal, .confirm-toast, .pagination, .undo-toast { display: none !important; }
+            .sheet-pane { display: block !important; }
+            .app-container { max-width: 100%; }
+            .card { background: white; border: 1px solid #ddd; break-inside: avoid; box-shadow: none; }
+            th { background: #f0f0f0 !important; color: black !important; position: static !important; }
+            td { color: black; border-bottom: 1px solid #eee; }
+            .money, .money-blue, .money-amber, .money-ot, .money-sum { color: black; }
+            .table-wrap { overflow: visible !important; border: 1px solid #aaa; }
+            .charts-row { display: none !important; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            .app-header { flex-direction: column; align-items: flex-start; }
+            .header-right { width: 100%; }
+            .sheet-tabs { width: 100%; justify-content: center; }
+            .flex-row { flex-direction: column; }
+            .flex-row .field-group { min-width: 100%; }
+            .drawer-body { grid-template-columns: 1fr; }
+            .drawer-depts { border-right: none; border-bottom: 1px solid var(--border); max-height: 200px; }
+            .worker-add-row { margin-left: 0; width: 100%; }
+            .worker-add-row input { flex: 1; width: auto; }
+            .manage-drawer { width: 100%; max-width: 100%; }
+            .search-bar { flex-direction: column; align-items: flex-start; }
+            .search-divider { display: none; }
+            .charts-row { grid-template-columns: 1fr; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 900px) {
+            .drawer-body { grid-template-columns: 160px 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== PASSWORD ===== -->
+<div class="password-overlay" id="passwordOverlay">
+    <div class="password-card">
+        <h2>Locked</h2>
+        <p>Enter your password to continue</p>
+        <input type="password" id="passwordInput" placeholder="••••••••" autofocus>
+        <div class="pw-error" id="pwError"></div>
+        <button class="btn" style="width:100%;justify-content:center;padding:11px;" id="unlockBtn">Unlock</button>
+    </div>
+</div>
+
+<!-- ===== UNDO TOAST ===== -->
+<div class="undo-toast" id="undoToast">
+    <span id="undoToastMsg">🗑️ Entry deleted</span>
+    <button class="undo-btn" id="undoBtnEl">↩ Undo</button>
+    <div class="undo-toast-bar" id="undoBar" style="width:100%;"></div>
+</div>
+
+<!-- ===== FULLSCREEN MODALS ===== -->
+<div id="fullscreenWorker" class="fullscreen-modal">
+    <div class="fullscreen-header">
+        <h2>👤 Worker Deduction — Full View</h2>
+        <button class="close-full" onclick="document.getElementById('fullscreenWorker').classList.remove('active')">✕ Close</button>
+    </div>
+    <div class="table-wrap" id="fullscreenWorkerContent"></div>
+</div>
+<div id="fullscreenShift" class="fullscreen-modal">
+    <div class="fullscreen-header">
+        <h2>📊 Shift & Dept Breakdown — Full View</h2>
+        <button class="close-full" onclick="document.getElementById('fullscreenShift').classList.remove('active')">✕ Close</button>
+    </div>
+    <div class="table-wrap" id="fullscreenShiftContent"></div>
+</div>
+
+<!-- ===== MANAGE DRAWER ===== -->
+<div class="manage-overlay" id="manageOverlay"></div>
+<div class="manage-drawer" id="manageDrawer">
+    <div class="drawer-header">
+        <div>
+            <div class="drawer-header h2" style="font-family:var(--display);font-size:1.05rem;font-weight:700;">⚙️ Manage</div>
+            <div class="sub" id="drawerSub">Departments & Workers</div>
+        </div>
+        <button class="drawer-close" id="closeDrawerBtn">✕</button>
+    </div>
+    <div class="drawer-body">
+        <div class="drawer-depts">
+            <div class="drawer-depts-header">
+                <span>Departments</span>
+                <span class="dept-count-badge" id="deptCountBadge">0</span>
+            </div>
+            <div class="drawer-dept-list" id="drawerDeptList"></div>
+            <div class="drawer-dept-add">
+                <input type="text" id="newDeptInput" placeholder="New department…" maxlength="30">
+                <button id="addDeptBtn">+ Add</button>
+            </div>
+        </div>
+        <div class="drawer-workers">
+            <div class="drawer-workers-header">
+                <span class="dept-label" id="workerPanelLabel">Select a department</span>
+                <span class="worker-total" id="workerPanelCount" style="display:none;"></span>
+                <div class="worker-add-row" id="workerAddRow" style="display:none;">
+                    <input type="text" id="newWorkerInput" placeholder="Worker name…" maxlength="50">
+                    <button id="addWorkerBtn">+ Add</button>
+                </div>
+            </div>
+            <div class="drawer-worker-grid" id="drawerWorkerGrid">
+                <p class="no-dept-msg">← Select a department to view and manage its workers.</p>
+            </div>
+        </div>
+    </div>
+    <div class="drawer-footer">
+        <span id="drawerTotalWorkers">— workers total</span>
+        <span class="total-pill">✖ on dept = delete if empty</span>
+        <span class="total-pill">✖ on worker = remove</span>
+    </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="app-container" id="app" style="display:none;">
+
+    <div class="app-header">
+        <div class="app-title">🍽️ Work Food <span>Deduction + OT</span></div>
+        <div class="header-right">
+            <div class="sheet-tabs">
+                <button class="tab-btn active" data-tab="entry">📋 Data Entry</button>
+                <button class="tab-btn" data-tab="weekly">📆 Weekly</button>
+                <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
+                <button class="tab-btn" data-tab="reports">🖨️ Reports</button>
+            </div>
+            <button class="manage-btn" id="manageBtn">⚙️ Manage</button>
+            <button class="btn-print" id="printActiveBtn">🖨️ Print</button>
+        </div>
+    </div>
+
+    <!-- ============ DATA ENTRY ============ -->
+    <div id="sheet-entry" class="sheet-pane active">
+        <div class="card">
+            <div class="card-title">
+                ➕ New Entry / Edit
+                <span class="ml-auto" style="display:flex;gap:6px;">
+                    <button class="btn sm secondary" id="resetFormBtn">⟲ Reset</button>
+                </span>
+            </div>
+            <div class="flex-row">
+                <div class="field-group" style="min-width:148px">
+                    <label>📅 Date</label>
+                    <input type="date" id="entryDate">
+                </div>
+                <div class="field-group">
+                    <label>🏢 Department</label>
+                    <select id="deptSelect" onchange="updateWorkersByDept()">
+                        <option value="">-- Select Dept --</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>👤 Worker</label>
+                    <select id="workerNameSelect">
+                        <option value="">-- Select Dept first --</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>⏳ Shift</label>
+                    <select id="shiftSelect">
+                        <option>Morning</option><option>Afternoon</option><option>Night</option>
+                    </select>
+                </div>
+                <div class="field-group" style="min-width:115px">
+                    <label>🍱 OT Food $</label>
+                    <input type="number" id="otFood" value="0" step="0.01" min="0">
+                </div>
+                <div class="field-group" style="min-width:115px">
+                    <label>🏢 Company Paid</label>
+                    <input type="number" id="companyPaid" value="0" step="0.01" min="0">
+                </div>
+                <div class="field-group" style="min-width:115px">
+                    <label>👤 Worker Paid</label>
+                    <input type="number" id="workerPaid" value="0" step="0.01" min="0">
+                </div>
+                <div class="field-group">
+                    <label>💰 Total (auto)</label>
+                    <div class="value-display" id="entryTotalDisplay">0.00</div>
+                </div>
+                <div class="field-group">
+                    <label>📆 Month</label>
+                    <div class="value-display" id="entryMonthDisplay">—</div>
+                </div>
+                <div class="field-group" style="min-width:auto;">
+                    <label>&nbsp;</label>
+                    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+                        <button class="btn" id="addEntryBtn">➕ Add</button>
+                        <button class="btn blue" id="editEntryBtn">✎ Edit</button>
+                    </div>
+                </div>
+                <span class="confirm-toast" id="confirmToast">✓ Entry added!</span>
+            </div>
+            <small style="color:var(--muted);margin-top:8px;display:block;">➡️ To edit, click ✎ on a row, modify values, then press Edit / Update.</small>
+        </div>
+
+        <!-- ✅ IMPROVED SEARCH BAR with date range + live search -->
+        <div class="search-bar">
+            <label>🔎 Filter:</label>
+            <select id="searchCategory">
+                <option value="worker">Worker</option>
+                <option value="dept">Department</option>
+                <option value="month">Month</option>
+                <option value="shift">Shift</option>
+            </select>
+            <input type="text" id="searchTerm" placeholder="Type to filter… (live)" style="min-width:160px;">
+            <button class="btn sm secondary" id="resetSearchBtn">✕ Reset</button>
+            <div class="search-divider"></div>
+            <label>📅 From:</label>
+            <input type="date" id="dateFrom" title="Filter from date">
+            <label>To:</label>
+            <input type="date" id="dateTo" title="Filter to date">
+            <div class="search-divider"></div>
+            <select id="monthQuickFilter" style="background:var(--surface3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:0.84rem;outline:none;">
+                <option value="">All Months</option>
+            </select>
+            <select id="rowsPerPage" style="background:var(--surface3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:0.84rem;outline:none;">
+                <option value="20">20/page</option>
+                <option value="50">50/page</option>
+                <option value="100">100/page</option>
+                <option value="0">All</option>
+            </select>
+            <button class="btn sm amber" id="showDataBtn" style="margin-left:auto;">📊 Show Data</button>
+            <select id="exportDropdown" style="background:var(--surface3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:white;font-size:0.84rem;outline:none;cursor:pointer;">
+                <option value="">📥 Export…</option>
+                <option value="csv">CSV (Excel)</option>
+                <option value="pdf">Print / PDF</option>
+            </select>
+            <button class="btn sm secondary" id="addTestData">➕ Sample</button>
+        </div>
+
+        <div class="table-wrap" style="margin-bottom:14px;">
+            <table id="entryTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-col="date">Date</th>
+                        <th class="sortable" data-col="worker">Worker</th>
+                        <th class="sortable" data-col="dept">Dept</th>
+                        <th>Shift</th>
+                        <th class="sortable" data-col="otFood">OT $</th>
+                        <th class="sortable" data-col="company">Company $</th>
+                        <th class="sortable" data-col="workerPaid">Worker $</th>
+                        <th class="sortable" data-col="companyOT">Company+OT</th>
+                        <th class="sortable" data-col="total">Total $</th>
+                        <th>Month</th>
+                        <th></th><th></th>
+                    </tr>
+                </thead>
+                <tbody id="entryTableBody"></tbody>
+            </table>
+            <div class="pagination" id="paginationBar"></div>
+        </div>
+
+        <div class="stats-row" id="monthStatsRow">
+            <div class="stat-chip"><span class="label" id="monthLabel">Latest month</span> — <span class="label">Company:</span><span class="val-green" id="monthCompanyTotal">0.00</span></div>
+            <div class="stat-chip"><span class="label">Worker:</span><span class="val-blue" id="monthWorkerTotal">0.00</span></div>
+            <div class="stat-chip"><span class="label">OT Food:</span><span class="val-ot" id="monthOTTotal">0.00</span></div>
+            <div class="stat-chip"><span class="label">Company+OT:</span><span class="val-sum" id="monthCompanyOTTotal">0.00</span></div>
+            <div class="stat-chip"><span class="label">Grand:</span><span class="val-amber" id="monthGrandTotal">0.00</span></div>
+            <div class="stat-chip"><span class="label">Total entries:</span><span class="val-green" id="totalEntries">0</span></div>
+        </div>
+    </div>
+
+    <!-- ============ WEEKLY ============ -->
+    <div id="sheet-weekly" class="sheet-pane">
+        <div class="card">
+            <div class="card-title">📆 Weekly Summary (incl. Company+OT)</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Week Start (Mon)</th><th>OT</th><th>Company</th><th>Worker</th><th>Company+OT</th><th>Grand Total</th><th># Entries</th></tr>
+                    </thead>
+                    <tbody id="weeklyBody"></tbody>
+                </table>
+            </div>
+            <p style="margin-top:11px;font-size:0.78rem;color:var(--muted);">✅ Weeks expand automatically as new entries are added.</p>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div id="sheet-dashboard" class="sheet-pane">
+        <!-- ✅ NEW: Charts row -->
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-card-title">📈 Monthly Spend Trend</div>
+                <div class="chart-wrap" id="chartMonthly"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-title">🏢 Top Departments by Total</div>
+                <div class="chart-wrap" id="chartDept"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-title">⏳ Shift Distribution</div>
+                <div class="chart-wrap" id="chartShift"></div>
+            </div>
+        </div>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-title">
+                    👤 Worker Deduction
+                    <span class="ml-auto"><button class="btn sm secondary" id="viewWorkerBtn">🔍 View Full</button></span>
+                </div>
+                <div class="table-wrap">
+                    <table id="dashboardWorkerDeduction">
+                        <thead><tr><th>Worker</th><th>Dept</th><th>OT</th><th>Company</th><th>Worker</th><th>Company+OT</th><th>Total Paid</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">
+                    📊 Shift & Department
+                    <span class="ml-auto"><button class="btn sm secondary" id="viewShiftBtn">🔍 View Full</button></span>
+                </div>
+                <div class="table-wrap">
+                    <table id="extraSummary">
+                        <thead><tr><th>Category</th><th>Type</th><th>OT</th><th>Company</th><th>Worker</th><th>Company+OT</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">📆 Month-wise Totals</div>
+                <div class="table-wrap">
+                    <table id="monthlySummary">
+                        <thead><tr><th>Month</th><th>OT</th><th>Company</th><th>Worker</th><th>Company+OT</th><th>Grand</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ REPORTS ============ -->
+    <div id="sheet-reports" class="sheet-pane">
+        <div class="card">
+            <div class="card-title">🖨️ Print / Export</div>
+            <div class="report-actions">
+                <button class="btn" id="printDailyBtn">📄 Daily Report</button>
+                <button class="btn blue" id="printWeeklyBtn">📆 Weekly Report</button>
+                <button class="btn amber" id="printMonthlyBtn">📊 Monthly Report</button>
+                <button class="btn secondary" id="printWorkerBtn">👤 Worker Report</button>
+                <button class="btn secondary" id="printDeptBtn">🏢 Dept Report</button>
+                <button class="btn purple" id="printShiftBtn">⏳ Shift Report</button>
+                <button class="btn secondary" id="downloadPdfBtn">⬇️ Print / PDF</button>
+                <button class="btn secondary" id="exportExcelBtn">📥 Export CSV</button>
+            </div>
+            <!-- ✅ NEW: JSON Backup / Restore -->
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <span style="font-size:0.76rem;color:var(--muted);font-family:var(--mono);">💾 DATA BACKUP:</span>
+                <button class="btn sm secondary" id="exportJsonBtn">💾 Backup JSON</button>
+                <button class="btn sm secondary" id="importJsonBtn">📂 Restore JSON</button>
+                <input type="file" id="importJsonInput" accept=".json" style="display:none;">
+                <span style="font-size:0.72rem;color:var(--muted);">JSON backup includes all entries & dept/worker data.</span>
+            </div>
+        </div>
+        <div class="print-preview" id="printableReport">
+            <p style="color:var(--muted);font-size:0.88rem;">Select a report type above to preview, then use Print / PDF or Export CSV.</p>
+        </div>
+    </div>
+
+</div><!-- /app-container -->
+
+<script>
+(function () {
+'use strict';
+
+/* ===== PASSWORD — ✅ HASHED with btoa ===== */
+const PW_HASH = btoa('food.in'); // 'Zm9vZC5pbg=='
+const pwOverlay = document.getElementById('passwordOverlay');
+const appEl     = document.getElementById('app');
+const pwInput   = document.getElementById('passwordInput');
+const pwError   = document.getElementById('pwError');
+
+function checkPassword() {
+    if (btoa(pwInput.value) === PW_HASH) {
+        pwOverlay.style.display = 'none';
+        appEl.style.display = 'block';
+        loadFromLocal();
+        loadSample();
+        refreshDeptOptions();
+        updateWorkersByDept();
+        refreshAll();
+    } else {
+        pwInput.classList.add('shake');
+        pwError.textContent = 'Incorrect password. Try again.';
+        setTimeout(() => { pwInput.classList.remove('shake'); }, 400);
+        pwInput.value = '';
+        pwInput.focus();
+    }
+}
+document.getElementById('unlockBtn').addEventListener('click', checkPassword);
+pwInput.addEventListener('keypress', e => { if (e.key === 'Enter') checkPassword(); });
+
+/* ===== DATA — ORIGINAL PRESERVED EXACTLY ===== */
+let entries = [];
+
+function loadSample() {
+    if (entries.length === 0) {
+        entries = [
+            { id:1, date:'2025-03-03', worker:'R.SELLADURAI',    dept:'PETN',        shift:'Morning',   company:120, workerPaid:30, otFood:20, total:170, month:'2025-03' },
+            { id:2, date:'2025-03-04', worker:'R.RAVICHANDRAN',  dept:'PROCESS',     shift:'Afternoon', company:100, workerPaid:25, otFood:10, total:135, month:'2025-03' },
+            { id:3, date:'2025-03-05', worker:'S.SUBRAMANIAM',   dept:'PETN',        shift:'Night',     company:140, workerPaid:40, otFood:15, total:195, month:'2025-03' },
+            { id:4, date:'2025-03-10', worker:'V.P.SANKAR',      dept:'MAINTENANCE', shift:'Morning',   company:90,  workerPaid:20, otFood:5,  total:115, month:'2025-03' },
+            { id:5, date:'2025-02-27', worker:'K.K.KALAISELVAN', dept:'BOILER',      shift:'Morning',   company:130, workerPaid:35, otFood:0,  total:165, month:'2025-02' },
+            { id:6, date:'2025-02-28', worker:'S.VARATHARAJ',    dept:'PETN',        shift:'Afternoon', company:110, workerPaid:28, otFood:12, total:150, month:'2025-02' },
+        ];
+    }
+}
+function saveToLocal() { try { localStorage.setItem('foodEntries_v2_ot', JSON.stringify(entries)); } catch(e){} }
+function loadFromLocal() { try { const s = localStorage.getItem('foodEntries_v2_ot'); if (s) entries = JSON.parse(s); } catch(e){} }
+
+/* ===== DEPT→WORKER MAP — ORIGINAL PRESERVED EXACTLY ===== */
+let deptWorkers = {
+    'PETN': ['R.SELLADURAI','R.RAVICHANDRAN','S.SUBRAMANIAM','V.P.SANKAR','K.K.KALAISELVAN','S.VARATHARAJ','R.SURESH','K.MUTHUSAMY','K.ROOBALAN','E.DINESH KUMAR'],
+    'DF': ['T.SARAVANAN','D.CHINNA DURAI','G.PRABAKARAN','S.ARUMUGAM','R.RANJITHKUMAR','R.SUDHAKAR','A.SAMUVEL','R.BALASUBRAMANIYAN','M.MANIKANDAN','D.BAKKIYARAJ','S.MANIKANDAN','R.MUKESH','K.P.PONNUSAMY','G.ANAND','M.CHANDRU','S.PRADEEP','V.MURUGESAN','P.SANMUGAVASANTH','R.SATHISHKUMAR','N.SURESH','P.SELVAKUMAR','K.DEENADHAYALAN','V.SUBRAMANI'],
+    'PROCESS': ['S.K.SELVARAJ','K.NAGARAJ','S.CHANDRASEKAR','V.KANDASAMY','P.SENTHIL KUMAR','R.MAHESHWARAN','M.VIJAYAKANTH','R.VENKATESAN','K.THIRUPATHI','M.SATHISH','M.NATARAJ','P.KARUPPAIYA','S.SURESH','P.P.SANKAR','N.ATHALI','S.K.RANGARAJ','A.THANGAMANI','P.VELMURUGAN','N.M.SELVARAJ','M.SELVAM','V.VELMURUGAN','K.PERUMAL','M.DURAI','S.JAYAKUMAR','P.ARIVALAGAN','R.MAHAKRISHNAN','N.VELMURUGAN','A.SENTHIL','S.PALANIVEL','G.VENKATESAN','S.KUMARAVEL','P.GUNASEKARAN','G.RAMASAMY','S.ARUNKUMAR','R.SANKAR','K.P.RAJU','K.S.SENTHILKUMAR','M.MURUGESAN','A.RAJASEKAR','R.JEEVA','V.P.MURUGESAN','P.MUTHUPANDI','S.MOORTHI','T.JAYAKANTH','D.DHANASEKAR','K.SEKAR','K.SELLADURAI','K.KATHIRAVAN','G.RAMAN','K.ASHOKAN','T.M.MURUGESAN','V.M.RAMESH','P.CHANDRAKUMAR','V.SURESH','R.PERIYASAMY','R.CHANDRASEKARAN','T.VARATHARAJ','K.NOORMOHAMED','P.VEERAMALAI','P.ANANTHAKUMAR','S.K.MURUGESAN','S.PAVITHRAN','U.P.VELMURUGAN','S.MURUGANANTHAM','V.K.PERUMAL','A.KANNAN','A.SARAVANAN','R.DINESHKUMAR','K.RAMALINGAM','R.SELVARAJ','S.VIJAYAKUMAR','V.SANKAR','S.VINOTH KUMAR','R.RANGARAJ','K.DEVARAJ','S.SAHADEVAN','T.MUTHU SELVAN','N.SENTHIL KUMAR','R.NATARAJAN','P.GNANASEKAR','M.JAYAPRAKASH','M.BALAN','A.MURUGAN','K.MUTHAIYAN','N.GURUSAMY','M.KARUNANETHI','P.SAKTHIVEL','V.P.SEKAR','S.RAMARAJAN','K.SUBRAMANI','M.CHINNATHAMBI','S.VASANTH','R.VINOTH','V.S.ANBAZHAGAN','N.PRAKASH','U.M.KARTHICK','P.RAJA','A.KALAIGNAN','S.ANBALAGAN','M.P.GNANASEKAR','J.CHITRAIMANI','R.PRABHU','S.CHANDRU','R.SARAVANAN'],
+    'BOILER': ['M.RAJASUNDARAM','K.KARUPAIYA','A.KARTHIK','K.CHANDRAMOHAN','S.CHINNATHAMBI','V.DHAYALAN','M.VIJAY','P.GOVINDHARAJ','S.RAJ KUMAR','A.SURESH','A.KUMARESAN','P.MURUGESAN'],
+    'LAB': ['P.PONNUSAMY','K.PRAKASH','S.KARTHICK','N.PARTHIPAN','R.SAHADEVAN','S.KRISHNAKUMAR'],
+    'ETP': ['S.ANAND','R.VEERAMANI'],
+    'MAINTENANCE': ['S.ANBU','P.RAMACHANDIRAN','T.MOOKAIYA','K.DHAVAPRAKASH','K.BASKAR','SURESH KUMAR','P.KARTHIKEYAN','P.RAJESH','P.MANIKANDAN'],
+    'PRINTING': [],
+    'STORE': ['K.BEERMOHAMED','S.ASHOKAN','A.BRITTO','P.GOVINDRAJ','K.THANGARAJ','S.KALIRAJ','N.NAGARAJ','B.P.SENTHIL','S.ANAND'],
+    'SUPERVISOR': ['R.KARUPPANNAN','R.RAMAR','R.SARATHKUMAR','G.MOHANRAJ','V.SUNDARAKUMAR','S.PRASANTH','C.SIVAKUMAR','N.MURUGANDAM','M.SENTHILKUMAR','R.GOVINDARAJ','A.MANIKANDAN','N.JEEVANANTHAM','U.R.PRABAKARAN','K.ANAND','S.AJITHKUMAR','A.SURYA','D.KARTHIKEYAN','R.PRABAKARAN','V.RANJITH'],
+    'YELLOW CARD': ['T.PERUMAL','P.RAJESH KANNAN','P.SARAVANAN','J.BASKAR','P.SENTHIL'],
+    'PONFORM': ['P.RAJENDERAN (STORE)','N.SENTHILKUMAR (MECH)','HENRY JHONSON(M)','D.RAJENDRAN (ELE)','V.RANJITH','MURUGAN (MECH)'],
+    'SECURITY': ['K.RAJENDARAN','A.SARAVANAN','N.MANIMUTHU','C.VEERASAMY','S.KALAIMANI','S.NALLUSAMY','G.MURUGAN','N.LOKESH','S.RAVI','M.KASIRAJA','M.VENKATACHALAM'],
+    'CRANE & JCB': ['ALAGESH','THIRU MURUGAN R','BAKKIYARAJ (JCB)'],
+    'CONVEYOUR': [],
+    'TRANSPORT': []
+};
+function saveMasterToLocal() { try { localStorage.setItem('deptWorkers_v2', JSON.stringify(deptWorkers)); } catch(e){} }
+function loadMasterFromLocal() { try { const d = localStorage.getItem('deptWorkers_v2'); if (d) deptWorkers = JSON.parse(d); } catch(e){} }
+loadMasterFromLocal();
+
+/* ===== HELPERS ===== */
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + (n||0).toFixed(2);
+function shiftBadge(s) {
+    const cls = {Morning:'shift-morning',Afternoon:'shift-afternoon',Night:'shift-night'}[s]||'';
+    return `<span class="badge-shift ${cls}">${s}</span>`;
+}
+
+/* ===== DEPT → WORKER (form) ===== */
+function updateWorkersByDept() {
+    const dept = $('deptSelect').value;
+    const sel  = $('workerNameSelect');
+    sel.innerHTML = '';
+    const ws = deptWorkers[dept] || [];
+    if (!ws.length) {
+        sel.innerHTML = '<option value="">-- No workers listed --</option>';
+    } else {
+        ws.forEach(w => { const o = document.createElement('option'); o.value = w; o.textContent = w; sel.appendChild(o); });
+    }
+}
+window.updateWorkersByDept = updateWorkersByDept;
+
+function refreshDeptOptions(sel) {
+    const opts = Object.keys(deptWorkers).sort().map(d => `<option value="${d}"${d===sel?' selected':''}>${d}</option>`).join('');
+    $('deptSelect').innerHTML = '<option value="">-- Select Dept --</option>' + opts;
+    updateWorkersByDept();
+    updateMonthQuickFilter();
+}
+
+function updateMonthQuickFilter() {
+    const months = [...new Set(entries.map(e=>e.month))].sort().reverse();
+    const cur = $('monthQuickFilter').value;
+    $('monthQuickFilter').innerHTML = '<option value="">All Months</option>' + months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${m}</option>`).join('');
+}
+
+/* ===== EDIT STATE ===== */
+let editingId = null;
+let lastAddedId = null;
+
+/* Set today as default */
+$('entryDate').value = new Date().toISOString().slice(0,10);
+
+/* ===== FORM CALCS ===== */
+function updateFormCalcs() {
+    const ot = parseFloat($('otFood').value)||0;
+    const c  = parseFloat($('companyPaid').value)||0;
+    const w  = parseFloat($('workerPaid').value)||0;
+    $('entryTotalDisplay').textContent = (ot+c+w).toFixed(2);
+    const d = $('entryDate').value;
+    if (d) $('entryMonthDisplay').textContent = d.substring(0,7);
+}
+['otFood','companyPaid','workerPaid'].forEach(id => $(id).addEventListener('input', updateFormCalcs));
+$('entryDate').addEventListener('change', updateFormCalcs);
+updateFormCalcs();
+
+/* ===== RESET ===== */
+function resetForm() {
+    $('entryDate').value = new Date().toISOString().slice(0,10);
+    $('deptSelect').value = '';
+    updateWorkersByDept();
+    $('shiftSelect').value = 'Morning';
+    $('otFood').value = '0';
+    $('companyPaid').value = '0';
+    $('workerPaid').value = '0';
+    updateFormCalcs();
+    editingId = null;
+    $('editEntryBtn').textContent = '✎ Edit';
+    $('editEntryBtn').className = 'btn blue';
+}
+$('resetFormBtn').addEventListener('click', resetForm);
+
+/* ===== POPULATE EDIT ===== */
+function populateEdit(entry) {
+    $('entryDate').value = entry.date;
+    $('deptSelect').value = entry.dept;
+    updateWorkersByDept();
+    setTimeout(() => { $('workerNameSelect').value = entry.worker; }, 60);
+    $('shiftSelect').value = entry.shift;
+    $('otFood').value    = entry.otFood;
+    $('companyPaid').value = entry.company;
+    $('workerPaid').value  = entry.workerPaid;
+    updateFormCalcs();
+    editingId = entry.id;
+    $('editEntryBtn').textContent = '✎ Update';
+    $('editEntryBtn').className = 'btn amber';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ===== TOAST ===== */
+function showConfirm(msg) {
+    const t = $('confirmToast');
+    t.textContent = msg || '✓ Entry added!';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ===== UNDO DELETE ===== */
+let deletedEntry = null;
+let undoTimerId  = null;
+const UNDO_MS = 5000;
+
+function showUndoToast(workerName) {
+    const toast = $('undoToast');
+    const bar   = $('undoBar');
+    $('undoToastMsg').textContent = `🗑️ "${workerName}" entry deleted`;
+    toast.classList.add('show');
+    bar.style.transition = 'none';
+    bar.style.width = '100%';
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            bar.style.transition = `width ${UNDO_MS}ms linear`;
+            bar.style.width = '0%';
+        });
+    });
+    if (undoTimerId) clearTimeout(undoTimerId);
+    undoTimerId = setTimeout(hideUndoToast, UNDO_MS);
+}
+function hideUndoToast() {
+    $('undoToast').classList.remove('show');
+    deletedEntry = null;
+}
+$('undoBtnEl').addEventListener('click', () => {
+    if (deletedEntry) {
+        entries.push(deletedEntry);
+        entries.sort((a,b) => a.date > b.date ? -1 : 1);
+        refreshAll();
+        showConfirm('✓ Entry restored!');
+    }
+    if (undoTimerId) clearTimeout(undoTimerId);
+    hideUndoToast();
+});
+
+/* ===== ADD ENTRY ===== */
+$('addEntryBtn').addEventListener('click', () => {
+    const date = $('entryDate').value;
+    if (!date) { showConfirm('⚠ Select a date!'); return; }
+    const dept = $('deptSelect').value;
+    if (!dept) { showConfirm('⚠ Select a dept!'); return; }
+    const ot = parseFloat($('otFood').value)||0;
+    const company    = parseFloat($('companyPaid').value)||0;
+    const workerPaid = parseFloat($('workerPaid').value)||0;
+    const newId = Date.now();
+    lastAddedId = newId;
+    entries.push({
+        id: newId, date,
+        worker: $('workerNameSelect').value,
+        dept, shift: $('shiftSelect').value,
+        company, workerPaid, otFood: ot,
+        total: ot+company+workerPaid,
+        month: date.substring(0,7)
+    });
+    refreshAll();
+    showConfirm('✓ Entry added!');
+});
+
+/* ===== EDIT ENTRY ===== */
+$('editEntryBtn').addEventListener('click', () => {
+    if (!editingId) { showConfirm('⚠ Click ✎ on a row first!'); return; }
+    const date = $('entryDate').value;
+    if (!date) { showConfirm('⚠ Select a date!'); return; }
+    const ot = parseFloat($('otFood').value)||0;
+    const company    = parseFloat($('companyPaid').value)||0;
+    const workerPaid = parseFloat($('workerPaid').value)||0;
+    const idx = entries.findIndex(e => e.id === editingId);
+    if (idx === -1) return;
+    lastAddedId = editingId;
+    entries[idx] = {
+        id: editingId, date,
+        worker: $('workerNameSelect').value,
+        dept: $('deptSelect').value,
+        shift: $('shiftSelect').value,
+        company, workerPaid, otFood: ot,
+        total: ot+company+workerPaid,
+        month: date.substring(0,7)
+    };
+    refreshAll();
+    showConfirm('✓ Entry updated!');
+    resetForm();
+});
+
+/* ===== SORTING ===== */
+let sortCol = 'date', sortDir = -1;
+document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; }
+        document.querySelectorAll('th.sortable').forEach(t => t.classList.remove('sort-asc','sort-desc'));
+        th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+        renderEntryTable();
+    });
+});
+
+/* ===== FILTER ===== */
+let currentFilter = { cat:'', term:'' };
+
+// ✅ Live search on input
+$('searchTerm').addEventListener('input', applyFilter);
+$('resetSearchBtn').addEventListener('click', () => {
+    currentFilter = { cat:'', term:'' };
+    $('searchTerm').value = '';
+    $('monthQuickFilter').value = '';
+    $('dateFrom').value = '';
+    $('dateTo').value = '';
+    currentPage = 1;
+    renderEntryTable();
+});
+$('searchTerm').addEventListener('keydown', e => { if (e.key==='Enter') applyFilter(); });
+$('monthQuickFilter').addEventListener('change', applyFilter);
+$('dateFrom').addEventListener('change', applyFilter);
+$('dateTo').addEventListener('change', applyFilter);
+$('rowsPerPage').addEventListener('change', () => { currentPage=1; renderEntryTable(); });
+
+function applyFilter() {
+    currentFilter = { cat: $('searchCategory').value, term: $('searchTerm').value.trim() };
+    currentPage = 1;
+    renderEntryTable();
+}
+
+function getFiltered() {
+    let data = [...entries];
+    const mf = $('monthQuickFilter').value;
+    if (mf) data = data.filter(e => e.month === mf);
+    // ✅ Date range filter
+    const df = $('dateFrom').value;
+    const dt = $('dateTo').value;
+    if (df) data = data.filter(e => e.date >= df);
+    if (dt) data = data.filter(e => e.date <= dt);
+    if (currentFilter.term) {
+        const t = currentFilter.term.toLowerCase(), cat = currentFilter.cat;
+        data = data.filter(e => {
+            if (cat==='worker') return e.worker.toLowerCase().includes(t);
+            if (cat==='dept')   return e.dept.toLowerCase().includes(t);
+            if (cat==='month')  return e.month.includes(t);
+            if (cat==='shift')  return e.shift.toLowerCase().includes(t);
+            return true;
+        });
+    }
+    data.sort((a,b) => {
+        let va = a[sortCol], vb = b[sortCol];
+        if (sortCol==='companyOT') { va=a.company+a.otFood; vb=b.company+b.otFood; }
+        if (typeof va==='string') return va.localeCompare(vb)*sortDir;
+        return (va-vb)*sortDir;
+    });
+    return data;
+}
+
+/* ===== PAGINATION ===== */
+let currentPage = 1;
+function getRowsPerPage() { return parseInt($('rowsPerPage').value)||0; }
+
+function renderPagination(pages, total) {
+    const bar = $('paginationBar');
+    const rpp = getRowsPerPage();
+    if (rpp===0 || pages<=1) {
+        bar.innerHTML = `<span class="pg-info">All ${total} entries</span>`;
+        return;
+    }
+    const s = (currentPage-1)*rpp+1, e2 = Math.min(currentPage*rpp,total);
+    let h = `<span class="pg-info">${s}–${e2} of ${total}</span>`;
+    h += `<button class="pg-btn" onclick="gotoPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+    for (let p=1; p<=pages; p++) {
+        if (pages>7 && Math.abs(p-currentPage)>2 && p!==1 && p!==pages) {
+            if (p===2||p===pages-1) h+=`<span class="pg-info">…</span>`;
+            continue;
+        }
+        h += `<button class="pg-btn${p===currentPage?' active':''}" onclick="gotoPage(${p})">${p}</button>`;
+    }
+    h += `<button class="pg-btn" onclick="gotoPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
+    bar.innerHTML = h;
+}
+window.gotoPage = p => { currentPage=p; renderEntryTable(); };
+
+/* ===== ENTRY TABLE ===== */
+function renderEntryTable() {
+    const data  = getFiltered();
+    const rpp   = getRowsPerPage();
+    const total = data.length;
+    const pages = rpp>0 ? Math.max(1,Math.ceil(total/rpp)) : 1;
+    if (currentPage>pages) currentPage=pages;
+    const slice = rpp>0 ? data.slice((currentPage-1)*rpp, currentPage*rpp) : data;
+
+    const tbody = $('entryTableBody');
+    if (!slice.length) {
+        tbody.innerHTML = '<tr><td colspan="12" class="empty">📭 No entries found</td></tr>';
+    } else {
+        tbody.innerHTML = slice.map(e => {
+            const isNew = e.id === lastAddedId;
+            return `<tr class="${isNew ? 'row-flash' : ''}" data-id="${e.id}">
+                <td style="font-family:var(--mono);font-size:0.8rem;">${e.date}</td>
+                <td style="font-weight:600;">${e.worker}</td>
+                <td><span class="badge-dept">${e.dept}</span></td>
+                <td>${shiftBadge(e.shift)}</td>
+                <td class="money-ot">${fmt(e.otFood)}</td>
+                <td class="money-blue">${fmt(e.company)}</td>
+                <td class="money">${fmt(e.workerPaid)}</td>
+                <td class="money-sum">${fmt(e.company+e.otFood)}</td>
+                <td class="money-amber">${fmt(e.total)}</td>
+                <td style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);">${e.month}</td>
+                <td><button class="btn danger" data-id="${e.id}">✖</button></td>
+                <td><button class="btn sm edit-row" data-id="${e.id}" style="background:var(--accent2);color:#0a1020;padding:4px 9px;">✎</button></td>
+            </tr>`;
+        }).join('');
+    }
+    /* ✅ Delete with UNDO (no browser confirm) */
+    tbody.querySelectorAll('button.danger[data-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = Number(btn.dataset.id);
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+            deletedEntry = entry;
+            entries = entries.filter(e => e.id !== id);
+            refreshAll();
+            showUndoToast(entry.worker);
+        });
+    });
+    tbody.querySelectorAll('.edit-row').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const entry = entries.find(e => e.id === Number(btn.dataset.id));
+            if (entry) populateEdit(entry);
+        });
+    });
+    renderPagination(pages, total);
+    renderMonthFooter();
+}
+
+/* ===== MONTH FOOTER ===== */
+function renderMonthFooter() {
+    const mm = {};
+    entries.forEach(e => {
+        if (!mm[e.month]) mm[e.month] = {ot:0,comp:0,worker:0};
+        mm[e.month].ot     += e.otFood||0;
+        mm[e.month].comp   += e.company;
+        mm[e.month].worker += e.workerPaid;
+    });
+    const months = Object.keys(mm).sort().reverse();
+    if (months.length) {
+        const l = mm[months[0]];
+        // ✅ Show actual month name
+        const mParts = months[0].split('-');
+        const mName  = new Date(parseInt(mParts[0]), parseInt(mParts[1])-1, 1).toLocaleString('default',{month:'short',year:'numeric'});
+        $('monthLabel').textContent = mName;
+        $('monthOTTotal').textContent        = l.ot.toFixed(2);
+        $('monthCompanyTotal').textContent   = l.comp.toFixed(2);
+        $('monthWorkerTotal').textContent    = l.worker.toFixed(2);
+        $('monthCompanyOTTotal').textContent = (l.ot+l.comp).toFixed(2);
+        $('monthGrandTotal').textContent     = (l.ot+l.comp+l.worker).toFixed(2);
+    }
+    $('totalEntries').textContent = entries.length;
+}
+
+/* ===== SHOW DATA BUTTON ===== */
+$('showDataBtn').addEventListener('click', () => {
+    let data = getFiltered();
+    let html = '<h4 style="margin-bottom:12px;font-family:var(--display);color:var(--accent);">🔍 Data Report</h4>';
+    const daily = {};
+    data.forEach(e => { if(!daily[e.date]) daily[e.date]=[]; daily[e.date].push(e); });
+    const sortedDates = Object.keys(daily).sort().reverse();
+    html += '<table><thead><tr><th>Date</th><th>Worker</th><th>Dept</th><th>Shift</th><th>OT</th><th>Company</th><th>Worker</th><th>Co+OT</th><th>Total</th></tr></thead><tbody>';
+    let gT=0,gOT=0,gC=0,gW=0,gCOT=0;
+    sortedDates.forEach(date => {
+        const day = daily[date]; let dT=0,dOT=0,dC=0,dW=0,dCOT=0;
+        day.forEach(e => {
+            const cot=e.company+e.otFood;
+            html+=`<tr><td>${e.date}</td><td>${e.worker}</td><td>${e.dept}</td><td>${e.shift}</td><td class="money-ot">${fmt(e.otFood)}</td><td class="money-blue">${fmt(e.company)}</td><td class="money">${fmt(e.workerPaid)}</td><td class="money-sum">${fmt(cot)}</td><td class="money-amber">${fmt(e.total)}</td></tr>`;
+            dT+=e.total; dOT+=e.otFood; dC+=e.company; dW+=e.workerPaid; dCOT+=cot;
+        });
+        html+=`<tr style="background:var(--surface3);font-weight:700;"><td colspan="4" style="text-align:right;">${date} TOTALS:</td><td class="money-ot">${fmt(dOT)}</td><td class="money-blue">${fmt(dC)}</td><td class="money">${fmt(dW)}</td><td class="money-sum">${fmt(dCOT)}</td><td class="money-amber">${fmt(dT)}</td></tr>`;
+        gT+=dT; gOT+=dOT; gC+=dC; gW+=dW; gCOT+=dCOT;
+    });
+    html+=`<tr style="background:#0a1a2a;font-size:0.95rem;font-weight:700;"><td colspan="4" style="text-align:right;">GRAND TOTAL:</td><td class="money-ot">${fmt(gOT)}</td><td class="money-blue">${fmt(gC)}</td><td class="money">${fmt(gW)}</td><td class="money-sum">${fmt(gCOT)}</td><td class="money-amber">${fmt(gT)}</td></tr>`;
+    html+='</tbody></table>';
+    $('printableReport').innerHTML = html;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector('[data-tab="reports"]').classList.add('active');
+    document.querySelectorAll('.sheet-pane').forEach(p=>p.classList.remove('active'));
+    $('sheet-reports').classList.add('active');
+});
+
+/* ===== EXPORT ===== */
+$('exportDropdown').addEventListener('change', e => {
+    if (e.target.value==='csv') exportCSV();
+    else if (e.target.value==='pdf') window.print();
+    e.target.value='';
+});
+$('exportExcelBtn').addEventListener('click', exportCSV);
+$('downloadPdfBtn').addEventListener('click', () => window.print());
+$('printActiveBtn').addEventListener('click', () => window.print());
+
+function exportCSV() {
+    let csv = 'Date,Worker,Dept,Shift,OT Food,Company,Worker Paid,Company+OT,Total,Month\n';
+    entries.forEach(e => csv += `${e.date},"${e.worker}","${e.dept}",${e.shift},${e.otFood||0},${e.company},${e.workerPaid},${e.company+e.otFood},${e.total},${e.month}\n`);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+    a.download = `food_entries_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    showConfirm('✓ CSV exported!');
+}
+
+/* ===== ✅ JSON BACKUP / RESTORE ===== */
+$('exportJsonBtn').addEventListener('click', () => {
+    const backup = { entries, deptWorkers, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `workfood_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    showConfirm('✓ Backup saved!');
+});
+$('importJsonBtn').addEventListener('click', () => $('importJsonInput').click());
+$('importJsonInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const data = JSON.parse(ev.target.result);
+            if (data.entries && Array.isArray(data.entries)) {
+                entries = data.entries;
+                if (data.deptWorkers) deptWorkers = data.deptWorkers;
+                saveToLocal();
+                saveMasterToLocal();
+                refreshDeptOptions();
+                updateWorkersByDept();
+                refreshAll();
+                showConfirm(`✓ Restored ${entries.length} entries!`);
+            } else {
+                showConfirm('⚠ Invalid backup file');
+            }
+        } catch(err) {
+            showConfirm('⚠ Could not read file');
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+});
+
+/* ===== SAMPLE DATA ===== */
+$('addTestData').addEventListener('click', () => {
+    const newId = Date.now();
+    lastAddedId = newId;
+    entries.push({ id:newId, date:new Date().toISOString().slice(0,10), worker:'R.SURESH', dept:'PETN', shift:'Morning', company:70, workerPaid:15, otFood:5, total:90, month:new Date().toISOString().slice(0,7) });
+    refreshAll();
+    showConfirm('✓ Sample added!');
+});
+
+/* ===== WEEKLY ===== */
+function renderWeeklySummary() {
+    const weekly = {};
+    entries.forEach(e => {
+        const d=new Date(e.date+'T12:00:00'), day=d.getDay();
+        const diff=d.getDate()-day+(day===0?-6:1);
+        const monday=new Date(d.setDate(diff)).toISOString().slice(0,10);
+        if (!weekly[monday]) weekly[monday]={ot:0,comp:0,worker:0,count:0};
+        weekly[monday].ot+=e.otFood||0; weekly[monday].comp+=e.company; weekly[monday].worker+=e.workerPaid; weekly[monday].count++;
+    });
+    const sorted = Object.keys(weekly).sort().reverse();
+    const tbody = $('weeklyBody');
+    if (!sorted.length) { tbody.innerHTML='<tr><td colspan="7" class="empty">No data</td></tr>'; return; }
+    tbody.innerHTML = sorted.map(mon => {
+        const v=weekly[mon];
+        return `<tr>
+            <td style="font-family:var(--mono);font-size:0.8rem;">${mon}</td>
+            <td class="money-ot">${fmt(v.ot)}</td>
+            <td class="money-blue">${fmt(v.comp)}</td>
+            <td class="money">${fmt(v.worker)}</td>
+            <td class="money-sum">${fmt(v.ot+v.comp)}</td>
+            <td class="money-amber">${fmt(v.ot+v.comp+v.worker)}</td>
+            <td style="color:var(--muted);font-family:var(--mono);">${v.count}</td>
+        </tr>`;
+    }).join('');
+}
+
+/* ===== DASHBOARD ===== */
+function renderDashboard() {
+    const wm={};
+    entries.forEach(e=>{
+        if(!wm[e.worker]) wm[e.worker]={dept:e.dept,ot:0,comp:0,paid:0};
+        wm[e.worker].ot+=e.otFood||0; wm[e.worker].comp+=e.company; wm[e.worker].paid+=e.workerPaid;
+    });
+    const wTbody=$('dashboardWorkerDeduction').querySelector('tbody');
+    const ws=Object.keys(wm);
+    wTbody.innerHTML=ws.length?ws.map(w=>{
+        const v=wm[w];
+        return `<tr><td style="font-weight:600;">${w}</td><td><span class="badge-dept">${v.dept}</span></td>
+            <td class="money-ot">${fmt(v.ot)}</td><td class="money-blue">${fmt(v.comp)}</td>
+            <td class="money">${fmt(v.paid)}</td><td class="money-sum">${fmt(v.ot+v.comp)}</td>
+            <td class="money-amber">${fmt(v.ot+v.comp+v.paid)}</td></tr>`;
+    }).join(''):'<tr><td colspan="7" class="empty">No data</td></tr>';
+    $('fullscreenWorkerContent').innerHTML=$('dashboardWorkerDeduction').outerHTML;
+
+    const mm2={};
+    entries.forEach(e=>{
+        if(!mm2[e.month]) mm2[e.month]={ot:0,comp:0,worker:0};
+        mm2[e.month].ot+=e.otFood||0; mm2[e.month].comp+=e.company; mm2[e.month].worker+=e.workerPaid;
+    });
+    const months=Object.keys(mm2).sort().reverse();
+    $('monthlySummary').querySelector('tbody').innerHTML=months.length?months.map(m=>{
+        const v=mm2[m];
+        return `<tr><td style="font-family:var(--mono);font-size:0.8rem;">${m}</td>
+            <td class="money-ot">${fmt(v.ot)}</td><td class="money-blue">${fmt(v.comp)}</td>
+            <td class="money">${fmt(v.worker)}</td><td class="money-sum">${fmt(v.ot+v.comp)}</td>
+            <td class="money-amber">${fmt(v.ot+v.comp+v.worker)}</td></tr>`;
+    }).join(''):'<tr><td colspan="6" class="empty">No data</td></tr>';
+
+    const sm={},dm={};
+    entries.forEach(e=>{
+        if(!sm[e.shift]) sm[e.shift]={ot:0,comp:0,worker:0};
+        sm[e.shift].ot+=e.otFood||0; sm[e.shift].comp+=e.company; sm[e.shift].worker+=e.workerPaid;
+        if(!dm[e.dept]) dm[e.dept]={ot:0,comp:0,worker:0};
+        dm[e.dept].ot+=e.otFood||0; dm[e.dept].comp+=e.company; dm[e.dept].worker+=e.workerPaid;
+    });
+    let xh='';
+    Object.entries(sm).forEach(([s,v])=>{ xh+=`<tr><td style="color:var(--muted);font-size:0.76rem;">Shift</td><td>${shiftBadge(s)}</td><td class="money-ot">${fmt(v.ot)}</td><td class="money-blue">${fmt(v.comp)}</td><td class="money">${fmt(v.worker)}</td><td class="money-sum">${fmt(v.ot+v.comp)}</td></tr>`; });
+    Object.entries(dm).forEach(([d,v])=>{ xh+=`<tr><td style="color:var(--muted);font-size:0.76rem;">Dept</td><td><span class="badge-dept">${d}</span></td><td class="money-ot">${fmt(v.ot)}</td><td class="money-blue">${fmt(v.comp)}</td><td class="money">${fmt(v.worker)}</td><td class="money-sum">${fmt(v.ot+v.comp)}</td></tr>`; });
+    $('extraSummary').querySelector('tbody').innerHTML=xh||'<tr><td colspan="6" class="empty">No data</td></tr>';
+    $('fullscreenShiftContent').innerHTML=$('extraSummary').outerHTML;
+
+    // ✅ Render SVG charts
+    renderCharts(mm2, dm, sm);
+}
+
+/* ===== ✅ SVG CHARTS ===== */
+function renderSVGBarChart(container, items, colorFn, emptyMsg) {
+    if (!items.length) { container.innerHTML = `<p class="chart-empty">${emptyMsg}</p>`; return; }
+    const W = 420, H = 160, PL = 50, PB = 36, PT = 14, PR = 10;
+    const bw = container.parentElement ? Math.max(320, container.parentElement.clientWidth - 44) : W;
+    const maxVal = Math.max(...items.map(d=>d.v), 1);
+    const barW   = Math.max(10, Math.floor((bw - PL - PR) / items.length) - 6);
+    const chartW = bw;
+    const chartH = H;
+
+    let svg = `<svg width="100%" viewBox="0 0 ${chartW} ${chartH}" xmlns="http://www.w3.org/2000/svg" style="display:block;">`;
+    // Y gridlines + labels
+    const ySteps = 4;
+    for (let i=0; i<=ySteps; i++) {
+        const yVal = (maxVal / ySteps) * i;
+        const y = PT + (chartH - PT - PB) * (1 - i/ySteps);
+        svg += `<line x1="${PL}" y1="${y}" x2="${chartW-PR}" y2="${y}" stroke="#2a3045" stroke-width="1"/>`;
+        svg += `<text x="${PL-4}" y="${y+4}" text-anchor="end" font-size="9" fill="#6b7594" font-family="monospace">${yVal>=1000?Math.round(yVal/100)/10+'k':Math.round(yVal)}</text>`;
+    }
+    // Bars
+    items.forEach((d, i) => {
+        const barH = ((d.v / maxVal) * (chartH - PT - PB)) || 1;
+        const x = PL + i * (barW + 6) + 3;
+        const y = PT + (chartH - PT - PB) - barH;
+        const color = colorFn(i, d);
+        svg += `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" fill="${color}" rx="3" opacity="0.85"/>`;
+        // Value above bar
+        if (barH > 18) {
+            svg += `<text x="${x+barW/2}" y="${y-3}" text-anchor="middle" font-size="8" fill="${color}" font-family="monospace">${d.v>=1000?(d.v/1000).toFixed(1)+'k':Math.round(d.v)}</text>`;
+        }
+        // Label below
+        const lbl = d.l.length > 6 ? d.l.slice(0,6) : d.l;
+        svg += `<text x="${x+barW/2}" y="${chartH - PB + 14}" text-anchor="middle" font-size="8" fill="#6b7594" font-family="monospace">${lbl}</text>`;
+    });
+    // Axis line
+    svg += `<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${chartH-PB}" stroke="#2a3045" stroke-width="1.5"/>`;
+    svg += `<line x1="${PL}" y1="${chartH-PB}" x2="${chartW-PR}" y2="${chartH-PB}" stroke="#2a3045" stroke-width="1.5"/>`;
+    svg += `</svg>`;
+    container.innerHTML = svg;
+}
+
+function renderCharts(mm2, dm, sm) {
+    // Monthly chart
+    const mItems = Object.keys(mm2).sort().map(m => {
+        const v = mm2[m]; const short = m.slice(2);
+        return { l: short, v: v.ot+v.comp+v.worker };
+    });
+    renderSVGBarChart($('chartMonthly'), mItems,
+        (i) => ['#4ade80','#60a5fa','#f59e0b','#c084fc','#f87171','#34d399','#a78bfa'][i % 7],
+        'No monthly data yet');
+
+    // Dept chart (top 8 by total)
+    const dItems = Object.entries(dm)
+        .map(([d,v]) => ({ l:d, v:v.ot+v.comp+v.worker }))
+        .sort((a,b) => b.v-a.v).slice(0,8);
+    renderSVGBarChart($('chartDept'), dItems,
+        (i) => `hsl(${200 + i*22},70%,60%)`,
+        'No dept data yet');
+
+    // Shift donut-like bar chart
+    const sColors = { Morning:'#f59e0b', Afternoon:'#60a5fa', Night:'#a78bfa' };
+    const sItems = Object.entries(sm).map(([s,v]) => ({ l:s, v:v.ot+v.comp+v.worker }));
+    renderSVGBarChart($('chartShift'), sItems,
+        (i, d) => sColors[d.l] || '#6b7594',
+        'No shift data yet');
+}
+
+$('viewWorkerBtn').addEventListener('click',()=>{ $('fullscreenWorkerContent').innerHTML=$('dashboardWorkerDeduction').outerHTML; $('fullscreenWorker').classList.add('active'); });
+$('viewShiftBtn').addEventListener('click',()=>{ $('fullscreenShiftContent').innerHTML=$('extraSummary').outerHTML; $('fullscreenShift').classList.add('active'); });
+
+/* ===== REPORTS ===== */
+function showReport(html, title) {
+    $('printableReport').innerHTML = `<h3 style="margin-bottom:14px;font-family:var(--display);font-size:1rem;color:var(--accent);">${title}</h3>` + html;
+}
+$('printDailyBtn').addEventListener('click',()=>{
+    const g={};
+    entries.forEach(e=>{ if(!g[e.date]) g[e.date]=[]; g[e.date].push(e); });
+    const dates=Object.keys(g).sort().reverse();
+    let h='<table><thead><tr><th>Date</th><th>Worker</th><th>Dept</th><th>Shift</th><th>OT</th><th>Company</th><th>Worker</th><th>Co+OT</th><th>Total</th></tr></thead><tbody>';
+    dates.forEach(date=>{
+        const day=g[date]; let dT=0,dOT=0,dC=0,dW=0,dCOT=0;
+        day.forEach(e=>{ const cot=e.company+e.otFood; h+=`<tr><td>${e.date}</td><td>${e.worker}</td><td>${e.dept}</td><td>${e.shift}</td><td class="money-ot">${fmt(e.otFood)}</td><td class="money-blue">${fmt(e.company)}</td><td class="money">${fmt(e.workerPaid)}</td><td class="money-sum">${fmt(cot)}</td><td class="money-amber">${fmt(e.total)}</td></tr>`; dT+=e.total;dOT+=e.otFood;dC+=e.company;dW+=e.workerPaid;dCOT+=cot; });
+        h+=`<tr style="background:var(--surface3);font-weight:700;"><td colspan="4" style="text-align:right;">${date} TOTALS:</td><td class="money-ot">${fmt(dOT)}</td><td class="money-blue">${fmt(dC)}</td><td class="money">${fmt(dW)}</td><td class="money-sum">${fmt(dCOT)}</td><td class="money-amber">${fmt(dT)}</td></tr>`;
+    });
+    h+='</tbody></table>';
+    showReport(h,'📄 Daily Report');
+});
+$('printWeeklyBtn').addEventListener('click',()=>showReport($('weeklyBody').closest('table').outerHTML,'📆 Weekly Report'));
+$('printMonthlyBtn').addEventListener('click',()=>showReport($('monthlySummary').outerHTML,'📊 Monthly Report'));
+$('printWorkerBtn').addEventListener('click',()=>{
+    const wm={};
+    entries.forEach(e=>{ if(!wm[e.worker]) wm[e.worker]={ot:0,comp:0,paid:0,count:0,dept:e.dept}; wm[e.worker].ot+=e.otFood||0; wm[e.worker].comp+=e.company; wm[e.worker].paid+=e.workerPaid; wm[e.worker].count++; });
+    const h=`<table><thead><tr><th>Worker</th><th>Dept</th><th>OT</th><th>Company</th><th>Worker Paid</th><th>Co+OT</th><th>Grand</th><th>#</th></tr></thead><tbody>${Object.entries(wm).sort((a,b)=>a[0].localeCompare(b[0])).map(([w,v])=>`<tr><td><strong>${w}</strong></td><td>${v.dept}</td><td class="money-ot">${fmt(v.ot)}</td><td class="money-blue">${fmt(v.comp)}</td><td class="money">${fmt(v.paid)}</td><td class="money-sum">${fmt(v.ot+v.comp)}</td><td class="money-amber">${fmt(v.ot+v.comp+v.paid)}</td><td>${v.count}</td></tr>`).join('')}</tbody></table>`;
+    showReport(h,'👤 Worker Report');
+});
+$('printDeptBtn').addEventListener('click',()=>{
+    const dm={};
+    entries.forEach(e=>{ if(!dm[e.dept]) dm[e.dept]={ot:0,comp:0,paid:0,count:0}; dm[e.dept].ot+=e.otFood||0; dm[e.dept].comp+=e.company; dm[e.dept].paid+=e.workerPaid; dm[e.dept].count++; });
+    const h=`<table><thead><tr><th>Dept</th><th>OT</th><th>Company</th><th>Worker</th><th>Co+OT</th><th>Total</th><th>Entries</th></tr></thead><tbody>${Object.entries(dm).sort((a,b)=>(b[1].ot+b[1].comp+b[1].paid)-(a[1].ot+a[1].comp+a[1].paid)).map(([d,v])=>`<tr><td><strong>${d}</strong></td><td class="money-ot">${fmt(v.ot)}</td><td class="money-blue">${fmt(v.comp)}</td><td class="money">${fmt(v.paid)}</td><td class="money-sum">${fmt(v.ot+v.comp)}</td><td class="money-amber">${fmt(v.ot+v.comp+v.paid)}</td><td>${v.count}</td></tr>`).join('')}</tbody></table>`;
+    showReport(h,'🏢 Department Report');
+});
+$('printShiftBtn').addEventListener('click',()=>{
+    const sm={};
+    entries.forEach(e=>{ if(!sm[e.shift]) sm[e.shift]={ot:0,comp:0,paid:0,count:0}; sm[e.shift].ot+=e.otFood||0; sm[e.shift].comp+=e.company; sm[e.shift].paid+=e.workerPaid; sm[e.shift].count++; });
+    const h=`<table><thead><tr><th>Shift</th><th>OT</th><th>Company</th><th>Worker</th><th>Co+OT</th><th>Total</th><th>Entries</th></tr></thead><tbody>${Object.entries(sm).map(([s,v])=>`<tr><td>${shiftBadge(s)}</td><td class="money-ot">${fmt(v.ot)}</td><td class="money-blue">${fmt(v.comp)}</td><td class="money">${fmt(v.paid)}</td><td class="money-sum">${fmt(v.ot+v.comp)}</td><td class="money-amber">${fmt(v.ot+v.comp+v.paid)}</td><td>${v.count}</td></tr>`).join('')}</tbody></table>`;
+    showReport(h,'⏳ Shift Report');
+});
+
+/* ===== MANAGE DRAWER ===== */
+let activeDept = null;
+
+function openDrawer() {
+    $('manageOverlay').classList.add('open');
+    $('manageDrawer').classList.add('open');
+    renderDrawerDepts();
+    updateDrawerFooter();
+}
+function closeDrawer() {
+    $('manageOverlay').classList.remove('open');
+    $('manageDrawer').classList.remove('open');
+}
+
+$('manageBtn').addEventListener('click', openDrawer);
+$('closeDrawerBtn').addEventListener('click', closeDrawer);
+$('manageOverlay').addEventListener('click', closeDrawer);
+
+function updateDrawerFooter() {
+    const total = Object.values(deptWorkers).reduce((s,w)=>s+w.length, 0);
+    const depts = Object.keys(deptWorkers).length;
+    $('drawerTotalWorkers').textContent = `${total} workers across ${depts} depts`;
+    $('deptCountBadge').textContent = depts;
+}
+
+function renderDrawerDepts() {
+    const list = $('drawerDeptList');
+    const depts = Object.keys(deptWorkers).sort();
+    list.innerHTML = depts.map(d => {
+        const cnt = deptWorkers[d].length;
+        const canDel = cnt === 0;
+        return `<div class="drawer-dept-item${d===activeDept?' active':''}" data-dept="${d}">
+            <span>${d}</span>
+            <div style="display:flex;align-items:center;gap:4px;">
+                <span class="wcount">${cnt}</span>
+                ${canDel ? `<button class="del-dept-btn" data-dept="${d}" title="Delete empty dept">✖</button>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+    list.querySelectorAll('.drawer-dept-item').forEach(el => {
+        el.addEventListener('click', e => {
+            if (e.target.classList.contains('del-dept-btn')) return;
+            activeDept = el.dataset.dept;
+            renderDrawerDepts();
+            renderDrawerWorkers();
+        });
+    });
+    list.querySelectorAll('.del-dept-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            const d = btn.dataset.dept;
+            if (deptWorkers[d] && deptWorkers[d].length === 0) {
+                delete deptWorkers[d];
+                if (activeDept === d) activeDept = null;
+                saveMasterToLocal();
+                refreshDeptOptions();
+                renderDrawerDepts();
+                renderDrawerWorkers();
+                updateDrawerFooter();
+                showConfirm(`✓ "${d}" deleted`);
+            }
+        });
+    });
+}
+
+function renderDrawerWorkers() {
+    const label  = $('workerPanelLabel');
+    const cntEl  = $('workerPanelCount');
+    const addRow = $('workerAddRow');
+    const grid   = $('drawerWorkerGrid');
+
+    if (!activeDept) {
+        label.textContent = 'Select a department';
+        cntEl.style.display = 'none';
+        addRow.style.display = 'none';
+        grid.innerHTML = '<p class="no-dept-msg">← Select a department to view and manage its workers.</p>';
+        return;
+    }
+
+    const workers = deptWorkers[activeDept] || [];
+    label.textContent = activeDept;
+    cntEl.textContent = `${workers.length} workers`;
+    cntEl.style.display = '';
+    addRow.style.display = '';
+
+    if (!workers.length) {
+        grid.innerHTML = '<p class="no-dept-msg" style="color:var(--muted);font-size:0.82rem;">No workers in this department yet. Add one above.</p>';
+    } else {
+        grid.innerHTML = workers.map(w => `
+            <div class="worker-chip">
+                <span>${w}</span>
+                <button data-worker="${w.replace(/"/g,'&quot;')}" title="Remove worker">✖</button>
+            </div>`).join('');
+        grid.querySelectorAll('.worker-chip button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                deptWorkers[activeDept] = deptWorkers[activeDept].filter(x => x !== btn.dataset.worker);
+                saveMasterToLocal();
+                updateWorkersByDept();
+                refreshAll();
+                renderDrawerDepts();
+                renderDrawerWorkers();
+                updateDrawerFooter();
+                showConfirm('✓ Worker removed');
+            });
+        });
+    }
+}
+
+$('addDeptBtn').addEventListener('click', () => {
+    const nd = $('newDeptInput').value.trim().toUpperCase();
+    if (!nd) return;
+    if (!deptWorkers[nd]) {
+        deptWorkers[nd] = [];
+        saveMasterToLocal();
+        refreshDeptOptions(nd);
+        renderDrawerDepts();
+        updateDrawerFooter();
+        showConfirm(`✓ Dept "${nd}" added`);
+    } else {
+        showConfirm('⚠ Dept already exists');
+    }
+    $('newDeptInput').value = '';
+});
+$('newDeptInput').addEventListener('keydown', e => { if (e.key==='Enter') $('addDeptBtn').click(); });
+
+$('addWorkerBtn').addEventListener('click', () => {
+    if (!activeDept) { showConfirm('⚠ Select a dept first'); return; }
+    const name = $('newWorkerInput').value.trim();
+    if (!name) return;
+    if (!deptWorkers[activeDept]) deptWorkers[activeDept] = [];
+    if (!deptWorkers[activeDept].includes(name)) {
+        deptWorkers[activeDept].push(name);
+        saveMasterToLocal();
+        updateWorkersByDept();
+        renderDrawerDepts();
+        renderDrawerWorkers();
+        updateDrawerFooter();
+        showConfirm(`✓ "${name}" added`);
+    } else {
+        showConfirm('⚠ Worker already exists');
+    }
+    $('newWorkerInput').value = '';
+});
+$('newWorkerInput').addEventListener('keydown', e => { if (e.key==='Enter') $('addWorkerBtn').click(); });
+
+/* ===== TABS ===== */
+document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.sheet-pane').forEach(p=>p.classList.remove('active'));
+        $(`sheet-${target}`).classList.add('active');
+    });
+});
+
+/* ===== ✅ KEYBOARD SHORTCUTS ===== */
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        closeDrawer();
+        $('fullscreenWorker').classList.remove('active');
+        $('fullscreenShift').classList.remove('active');
+    }
+});
+
+/* ===== REFRESH ALL ===== */
+function refreshAll() {
+    updateFormCalcs();
+    updateMonthQuickFilter();
+    renderEntryTable();
+    renderWeeklySummary();
+    renderDashboard();
+    saveToLocal();
+}
+
+})();
+</script>
+</body>
+</html>
